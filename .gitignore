@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+
+# Spark / Logs
+/tmp/
+/checkpointLocation/
+*.log
+
+# Docker
+docker-compose.override.yml
+**/Dockerfile.*
+**/docker-compose.*.yml
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+clickhouse_data/
