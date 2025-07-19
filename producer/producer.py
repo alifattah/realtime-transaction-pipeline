@@ -8,7 +8,7 @@ import time
 fake = Faker('fa_IR')
 
 # Kafka config
-KAFKA_BROKER = 'localhost:9092'
+KAFKA_BROKER = '127.0.0.1:9092'
 TOPIC_NAME = 'transactions_raw'
 
 PAYMENT_TYPES = ["کارت اعتباری", "اینترنت", "POS"]
@@ -50,6 +50,6 @@ while True:
     print(f"Sent: {transaction}")
 
     order_id_counter += 1
-    time.sleep(1)  # one transactions per second
+    time.sleep(60)  # one transactions per minute
 
 # producer.flush()  # برای مواقعی که حلقه تموم می‌شه

@@ -8,6 +8,7 @@ from pyspark.sql.types import StructType, StructField, LongType, IntegerType, Do
 spark = SparkSession.builder \
     .appName("RealTimeAggregations") \
     .master("spark://spark-master:7077") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
     .getOrCreate()
 
 # 2. تعریف schema داده ورودی
@@ -26,7 +27,7 @@ schema = StructType([
 df_raw = spark \
     .readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "kafka:9092") \
+    .option("kafka.bootstrap.servers", "kafka:29092") \
     .option("subscribe", "transactions_raw") \
     .option("startingOffsets", "latest") \
     .load()
@@ -70,7 +71,7 @@ query = output \
     .writeStream \
     .format("kafka") \
     .outputMode("update") \
-    .option("kafka.bootstrap.servers", "kafka:9092") \
+    .option("kafka.bootstrap.servers", "kafka:29092") \
     .option("topic", "transactions_agg") \
     .option("checkpointLocation", "/tmp/checkpoints") \
     .start()
