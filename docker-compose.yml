@@ -21,10 +21,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      # ADVERTISED_HOST_NAME: host.docker.internal
-      # KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
-      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://127.0.0.1:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -35,10 +32,12 @@ services:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse
     ports:
-      - "8123:8123"
-      - "9000:9000"
+      - "8123:8123" # HTTP API
+      - "9000:9000" # Native TCP
     volumes:
-      - ./clickhouse_data:/var/lib/clickhouse
+      # - ./clickhouse_data:/var/lib/clickhouse
+      - clickhouse-volume:/var/lib/clickhouse
+      - ./clickhouse-init:/docker-entrypoint-initdb.d
 
   spark-master:
     image: bitnami/spark:3
@@ -69,3 +68,23 @@ services:
     environment:
       - SPARK_HOME=/opt/bitnami/spark
       - HOME=/root
+
+  clickhouse-consumer:
+    build: ./clickhouse-consumer
+    container_name: clickhouse-consumer
+    depends_on:
+      - kafka
+      - clickhouse-server
+    restart: unless-stopped
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_TOPIC=transactions_agg
+      - CLICKHOUSE_HOST=clickhouse-server
+      - CLICKHOUSE_PORT=9000
+      - CLICKHOUSE_DB=default
+      - CLICKHOUSE_TABLE=aggregated_analytics
+      - CLICKHOUSE_USER=consumer
+      - CLICKHOUSE_PASSWORD=MySecret
+
+volumes:
+  clickhouse-volume:

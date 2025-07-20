@@ -50,6 +50,6 @@ while True:
     print(f"Sent: {transaction}")
 
     order_id_counter += 1
-    time.sleep(60)  # one transactions per minute
+    time.sleep(0.1)
 
 # producer.flush()  # برای مواقعی که حلقه تموم می‌شه
