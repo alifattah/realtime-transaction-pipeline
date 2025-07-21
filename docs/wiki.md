@@ -46,6 +46,28 @@ Key components:
 4. **Monitor ClickHouse**
    Connect to ClickHouse (port `9000` or HTTP `8123`) to inspect the `aggregated_analytics` table defined in `clickhouse-init/init.sql`.
 
+5. **Verify Kafka streams**
+   ```bash
+   # Read a few raw events
+   docker-compose exec kafka kafka-console-consumer \
+     --bootstrap-server kafka:29092 \
+     --topic transactions_raw --from-beginning --max-messages 5
+
+   # Read a few aggregated events
+   docker-compose exec kafka kafka-console-consumer \
+     --bootstrap-server kafka:29092 \
+     --topic transactions_agg --from-beginning --max-messages 5
+   ```
+   These commands confirm data is flowing through both topics.
+
+6. **Query stored data**
+   ```bash
+   docker-compose exec clickhouse-server clickhouse-client \
+     --user consumer --password MySecret \
+     --query "SELECT * FROM aggregated_analytics LIMIT 5;"
+   ```
+   Replace `aggregated_analytics` with any table you want to inspect.
+
 ---
 
 ## Producer
@@ -72,6 +94,14 @@ The producer creates synthetic purchase events using `faker` and `random` librar
 
 ## Database Initialization
 `clickhouse-init/` contains scripts executed automatically when the ClickHouse container starts. `init.sql` creates the `aggregated_analytics` table and `01-create-user.sql` defines a user with permissions.
+
+## Access Credentials
+The default ClickHouse user created by the initialization scripts is:
+
+- **Username:** `consumer`
+- **Password:** `MySecret`
+
+Use these credentials when connecting via `clickhouse-client` or any ClickHouse GUI.
 
 ---
 
